@@ -47,6 +47,9 @@ def quiz_endpoint():
     if secret != SECRET:
         return jsonify({"error": "forbidden - invalid secret"}), 403
 
+    # ---------------------------
+    # 🔥 Replaced Playwright with simple requests
+    # ---------------------------
     try:
         response = requests.get(url, timeout=30)
         response.raise_for_status()
@@ -57,6 +60,9 @@ def quiz_endpoint():
             "detail": str(e)
         }), 500
 
+    answer = extract_demo_answer(html, url)
+
+    # Detect submit URL
     submit_match = re.search(
         r'https?://[^\s"\'<>]+/submit[^\s"\'<>]*',
         html
@@ -78,6 +84,7 @@ def quiz_endpoint():
         "answer": answer
     }
 
+    # Submit answer
     try:
         r = requests.post(submit_url, json=submit_payload, timeout=30)
         r.raise_for_status()
