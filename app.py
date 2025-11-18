@@ -16,7 +16,7 @@ def extract_demo_answer(page_html, page_url):
     m = re.search(r'sum of the .*?\"value\".*?(\d+)', page_html, re.I | re.S)
     if m:
         return int(m.group(1))
-    return 12345  # fallback answer
+    return 12345  
 
 @app.route("/", methods=["GET"])
 def home():
@@ -47,9 +47,6 @@ def quiz_endpoint():
     if secret != SECRET:
         return jsonify({"error": "forbidden - invalid secret"}), 403
 
-    # ---------------------------
-    # 🔥 Replaced Playwright with simple requests
-    # ---------------------------
     try:
         response = requests.get(url, timeout=30)
         response.raise_for_status()
@@ -62,7 +59,6 @@ def quiz_endpoint():
 
     answer = extract_demo_answer(html, url)
 
-    # Detect submit URL
     submit_match = re.search(
         r'https?://[^\s"\'<>]+/submit[^\s"\'<>]*',
         html
@@ -84,7 +80,6 @@ def quiz_endpoint():
         "answer": answer
     }
 
-    # Submit answer
     try:
         r = requests.post(submit_url, json=submit_payload, timeout=30)
         r.raise_for_status()
