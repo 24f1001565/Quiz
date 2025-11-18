@@ -48,17 +48,12 @@ def quiz_endpoint():
         return jsonify({"error": "forbidden - invalid secret"}), 403
 
     try:
-        with sync_playwright() as pw:
-            browser = pw.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, timeout=60_000)
-            page.wait_for_load_state("networkidle", timeout=30_000)
-            html = page.content()
-            answer = extract_demo_answer(html, url)
-            browser.close()
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        html = response.text
     except Exception as e:
         return jsonify({
-            "error": "failed to render page",
+            "error": "failed to fetch page",
             "detail": str(e)
         }), 500
 
